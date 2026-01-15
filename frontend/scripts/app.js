@@ -174,10 +174,15 @@ function renderRecipeList() {
 function createRecipeCard(recipe) {
   const totalTime = (recipe.prepTime || 0) + (recipe.cookTime || 0) + (recipe.additionalTime || 0);
 
+  // Use background-image for uploaded images, emoji for fallback
+  const imageStyle = recipe.imageUrl
+    ? `style="background-image: url('${recipe.imageUrl}');"`
+    : '';
+
   return `
     <div class="recipe-card" onclick="showRecipeDetail('${recipe.id}')">
-      <div class="recipe-card-image">
-        ${recipe.imageUrl ? `<img src="${recipe.imageUrl}" alt="${recipe.title}">` : '🍳'}
+      <div class="recipe-card-image" ${imageStyle}>
+        ${!recipe.imageUrl ? '🍳' : ''}
       </div>
       <div class="recipe-card-content">
         <h3 class="recipe-card-title">${recipe.title}</h3>
@@ -223,9 +228,14 @@ window.showRecipeDetail = async function (recipeId) {
 
     const modalBody = recipeDetailModal.querySelector('.modal-body');
 
+    // Use background-image for uploaded images, emoji for fallback
+    const imageStyle = recipe.imageUrl
+      ? `style="background-image: url('${recipe.imageUrl}');"`
+      : '';
+
     modalBody.innerHTML = `
-      <div class="recipe-detail-image">
-        ${recipe.imageUrl ? `<img src="${recipe.imageUrl}" alt="${recipe.title}">` : '🍳'}
+      <div class="recipe-detail-image" ${imageStyle}>
+        ${!recipe.imageUrl ? '🍳' : ''}
       </div>
       
       <h2 class="mb-4">${recipe.title}</h2>

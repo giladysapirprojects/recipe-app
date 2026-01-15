@@ -131,14 +131,7 @@ router.delete('/:id', async (req, res) => {
         }
 
         // Delete the recipe from database
-        const deleted = await Recipe.delete(req.params.id);
-
-        if (!deleted) {
-            return res.status(404).json({
-                success: false,
-                error: 'Recipe not found'
-            });
-        }
+        await Recipe.delete(req.params.id);
 
         // CLEANUP: Delete local image file if it exists
         // NOTE: For cloud storage migration, replace fs.unlink with cloud delete API

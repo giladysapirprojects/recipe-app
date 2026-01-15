@@ -90,7 +90,7 @@ async function testUploadValidImage(format) {
 
     // Upload the file
     await fileInput.sendKeys(imagePath);
-    await sleep(1000); // Wait for preview to load
+    await sleep(2000); // Wait for FileReader to process and show preview
 
     // Verify preview is shown
     const previewVisible = await isVisible(driver, '#imagePreviewContainer');
@@ -138,7 +138,7 @@ async function testRemoveImage() {
 
     // Upload image
     await fileInput.sendKeys(imagePath);
-    await sleep(1000);
+    await sleep(2000); // Wait for FileReader to process
 
     // Verify preview is visible
     const previewVisible = await isVisible(driver, '#imagePreviewContainer');

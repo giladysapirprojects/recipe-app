@@ -259,8 +259,10 @@
 .recipe-card-image {
     width: 100%;
     height: 200px;
-    object-fit: cover;
     background: var(--gradient-accent);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -605,8 +607,10 @@
 .recipe-detail-image {
     width: 100%;
     height: 300px;
-    object-fit: cover;
     background: var(--gradient-accent);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     display: flex;
     align-items: center;
     justify-content: center;
