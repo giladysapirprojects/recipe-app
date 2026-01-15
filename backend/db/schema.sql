@@ -8,8 +8,10 @@ CREATE TABLE IF NOT EXISTS recipes (
     category TEXT NOT NULL,
     prep_time INTEGER DEFAULT 0,
     cook_time INTEGER DEFAULT 0,
+    additional_time INTEGER DEFAULT 0,
     servings INTEGER DEFAULT 0,
     image_url TEXT DEFAULT '',
+    source_url TEXT DEFAULT '',
     notes TEXT DEFAULT '',
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL

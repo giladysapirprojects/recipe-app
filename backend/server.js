@@ -5,7 +5,9 @@
 
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const recipesRouter = require('./routes/recipes');
+const uploadRouter = require('./routes/upload');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -14,6 +16,10 @@ const PORT = process.env.PORT || 3000;
 app.use(cors()); // Allow cross-origin requests from frontend
 app.use(express.json()); // Parse JSON request bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
+
+// Static file serving for uploaded images
+// Serves /frontend/assets directory at /assets route
+app.use('/assets', express.static(path.join(__dirname, '../frontend/assets')));
 
 // Request logging middleware (development)
 if (process.env.NODE_ENV === 'development') {
@@ -25,6 +31,7 @@ if (process.env.NODE_ENV === 'development') {
 
 // API Routes
 app.use('/api/recipes', recipesRouter);
+app.use('/api/upload', uploadRouter);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

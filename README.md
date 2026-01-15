@@ -67,6 +67,26 @@ recipe-app/
 
 - [Backend README](backend/README.md) - API documentation and setup
 - [Walkthrough](docs/walkthrough.md) - Complete feature guide
+- [Testing Guide](tests/README.md) - Automated testing with Selenium
+
+## Testing
+
+Automated tests using Selenium WebDriver validate all major features without requiring screen capture permissions.
+
+**Run all tests** (headless mode):
+```bash
+cd tests
+npm install
+npm test
+```
+
+**Run tests with visible browser**:
+```bash
+npm run test:visible
+```
+
+See the [Testing README](tests/README.md) for detailed instructions.
+
 
 ## Development
 

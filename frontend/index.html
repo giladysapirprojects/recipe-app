@@ -1,37 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="A beautiful recipe storage application for managing and organizing your favorite recipes.">
+  <meta name="description"
+    content="A beautiful recipe storage application for managing and organizing your favorite recipes.">
   <meta name="author" content="Recipe App">
   <title>Recipe Storage App - Save & Organize Your Favorite Recipes</title>
-  
+
   <!-- Stylesheets -->
   <link rel="stylesheet" href="styles/main.css">
   <link rel="stylesheet" href="styles/components.css">
-  
+
   <!-- Favicon -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍳</text></svg>">
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍳</text></svg>">
 </head>
+
 <body>
   <!-- Header -->
   <header class="app-header">
     <div class="container">
       <div class="header-content">
         <h1 class="app-logo">🍳 RecipeBox</h1>
-        
+
         <div class="search-container">
           <span class="search-icon">🔍</span>
-          <input 
-            type="text" 
-            id="searchInput" 
-            class="search-input" 
-            placeholder="Search recipes, ingredients, or tags..."
-            aria-label="Search recipes"
-          >
+          <input type="text" id="searchInput" class="search-input" placeholder="Search recipes, ingredients, or tags..."
+            aria-label="Search recipes">
         </div>
-        
+
         <div class="header-actions">
           <button id="addRecipeBtn" class="btn btn-primary" aria-label="Add new recipe">
             ➕ Add Recipe
@@ -40,19 +39,19 @@
       </div>
     </div>
   </header>
-  
+
   <!-- Main Content -->
   <main class="container section">
     <!-- Category Filters -->
     <div id="categoryFilters" class="category-filters" role="navigation" aria-label="Recipe categories">
       <!-- Dynamically populated -->
     </div>
-    
+
     <!-- Recipe Grid -->
     <div id="recipeGrid" class="recipe-grid" role="list">
       <!-- Dynamically populated -->
     </div>
-    
+
     <!-- Empty State -->
     <div id="emptyState" class="empty-state hidden">
       <div class="empty-state-icon">🍽️</div>
@@ -65,9 +64,10 @@
       </button>
     </div>
   </main>
-  
+
   <!-- Recipe Detail Modal -->
-  <div id="recipeDetailModal" class="modal-overlay hidden" role="dialog" aria-labelledby="recipeDetailTitle" aria-modal="true">
+  <div id="recipeDetailModal" class="modal-overlay hidden" role="dialog" aria-labelledby="recipeDetailTitle"
+    aria-modal="true">
     <div class="modal">
       <div class="modal-header">
         <h2 id="recipeDetailTitle" class="modal-title">Recipe Details</h2>
@@ -78,7 +78,7 @@
       </div>
     </div>
   </div>
-  
+
   <!-- Recipe Form Modal -->
   <div id="recipeFormModal" class="modal-overlay hidden" role="dialog" aria-labelledby="formTitle" aria-modal="true">
     <div class="modal">
@@ -91,24 +91,15 @@
           <!-- Basic Information -->
           <div class="form-group">
             <label for="recipeTitle" class="form-label form-label-required">Recipe Title</label>
-            <input 
-              type="text" 
-              id="recipeTitle" 
-              class="form-input" 
-              placeholder="e.g., Chocolate Chip Cookies"
-              required
-            >
+            <input type="text" id="recipeTitle" class="form-input" placeholder="e.g., Chocolate Chip Cookies" required>
           </div>
-          
+
           <div class="form-group">
             <label for="recipeDescription" class="form-label">Description</label>
-            <textarea 
-              id="recipeDescription" 
-              class="form-textarea" 
-              placeholder="Brief description of your recipe..."
-            ></textarea>
+            <textarea id="recipeDescription" class="form-textarea"
+              placeholder="Brief description of your recipe..."></textarea>
           </div>
-          
+
           <div class="form-row">
             <div class="form-group">
               <label for="recipeCategory" class="form-label form-label-required">Category</label>
@@ -123,54 +114,66 @@
                 <option value="Beverage">Beverage</option>
               </select>
             </div>
-            
+
             <div class="form-group">
               <label for="recipeTags" class="form-label">Tags</label>
-              <input 
-                type="text" 
-                id="recipeTags" 
-                class="form-input" 
-                placeholder="e.g., vegetarian, quick, healthy"
-              >
+              <input type="text" id="recipeTags" class="form-input" placeholder="e.g., vegetarian, quick, healthy">
               <small style="color: var(--gray); font-size: var(--font-size-xs);">Separate tags with commas</small>
             </div>
           </div>
-          
+
           <div class="form-row">
             <div class="form-group">
               <label for="recipePrepTime" class="form-label">Prep Time (minutes)</label>
-              <input 
-                type="number" 
-                id="recipePrepTime" 
-                class="form-input" 
-                placeholder="15"
-                min="0"
-              >
+              <input type="number" id="recipePrepTime" class="form-input" placeholder="15" min="0">
             </div>
-            
+
             <div class="form-group">
               <label for="recipeCookTime" class="form-label">Cook Time (minutes)</label>
-              <input 
-                type="number" 
-                id="recipeCookTime" 
-                class="form-input" 
-                placeholder="30"
-                min="0"
-              >
+              <input type="number" id="recipeCookTime" class="form-input" placeholder="30" min="0">
             </div>
-            
+
             <div class="form-group">
-              <label for="recipeServings" class="form-label">Servings</label>
-              <input 
-                type="number" 
-                id="recipeServings" 
-                class="form-input" 
-                placeholder="4"
-                min="1"
-              >
+              <label for="recipeAdditionalTime" class="form-label">Additional Time (minutes)</label>
+              <input type="number" id="recipeAdditionalTime" class="form-input" placeholder="10" min="0">
             </div>
           </div>
-          
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="recipeServings" class="form-label">Servings</label>
+              <input type="number" id="recipeServings" class="form-input" placeholder="4" min="1">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="recipeSourceUrl" class="form-label">Source URL (optional)</label>
+            <input type="url" id="recipeSourceUrl" class="form-input" placeholder="https://example.com/recipe">
+            <small style="color: var(--gray); font-size: var(--font-size-xs);">Add a link to the original recipe (if
+              applicable)</small>
+          </div>
+
+          <!-- Image Upload -->
+          <div class="form-group">
+            <label for="recipeImage" class="form-label">Recipe Image (optional)</label>
+            <input type="file" id="recipeImage" class="form-input-file"
+              accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" aria-describedby="imageHelp">
+            <small id="imageHelp" style="color: var(--gray); font-size: var(--font-size-xs);">
+              Maximum file size: 5MB. Supported formats: JPEG, PNG, GIF, WebP
+            </small>
+
+            <!-- Image Preview Container -->
+            <div id="imagePreviewContainer" class="image-preview-container hidden">
+              <img id="imagePreview" class="image-preview" alt="Recipe image preview">
+              <button type="button" id="removeImageBtn" class="btn btn-secondary btn-sm">
+                ✕ Remove Image
+              </button>
+            </div>
+
+            <!-- Hidden input to store existing image URL in edit mode -->
+            <input type="hidden" id="existingImageUrl" value="">
+          </div>
+
           <!-- Ingredients -->
           <div class="form-group">
             <label class="form-label form-label-required">Ingredients</label>
@@ -181,7 +184,7 @@
               ➕ Add Ingredient
             </button>
           </div>
-          
+
           <!-- Instructions -->
           <div class="form-group">
             <label class="form-label form-label-required">Instructions</label>
@@ -194,15 +197,16 @@
           </div>
         </form>
       </div>
-      
+
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-close-modal>Cancel</button>
         <button type="submit" form="recipeForm" class="btn btn-primary">💾 Save Recipe</button>
       </div>
     </div>
   </div>
-  
+
   <!-- Scripts -->
   <script type="module" src="scripts/app.js"></script>
 </body>
+
 </html>

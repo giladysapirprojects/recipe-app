@@ -90,6 +90,10 @@ function setupEventListeners() {
   // Dynamic ingredient/instruction buttons
   document.getElementById('addIngredientBtn').addEventListener('click', addIngredientField);
   document.getElementById('addInstructionBtn').addEventListener('click', addInstructionField);
+
+  // Image upload handlers
+  document.getElementById('recipeImage').addEventListener('change', handleImageSelection);
+  document.getElementById('removeImageBtn').addEventListener('click', removeImage);
 }
 
 /**
@@ -168,7 +172,7 @@ function renderRecipeList() {
  * Create recipe card HTML
  */
 function createRecipeCard(recipe) {
-  const totalTime = (recipe.prepTime || 0) + (recipe.cookTime || 0);
+  const totalTime = (recipe.prepTime || 0) + (recipe.cookTime || 0) + (recipe.additionalTime || 0);
 
   return `
     <div class="recipe-card" onclick="showRecipeDetail('${recipe.id}')">
@@ -241,6 +245,12 @@ window.showRecipeDetail = async function (recipeId) {
             <div class="recipe-meta-value">${formatTime(recipe.cookTime)}</div>
           </div>
         ` : ''}
+        ${recipe.additionalTime ? `
+          <div class="recipe-meta-item">
+            <div class="recipe-meta-label">Additional Time</div>
+            <div class="recipe-meta-value">${formatTime(recipe.additionalTime)}</div>
+          </div>
+        ` : ''}
         ${recipe.servings ? `
           <div class="recipe-meta-item">
             <div class="recipe-meta-label">Servings</div>
@@ -252,6 +262,15 @@ window.showRecipeDetail = async function (recipeId) {
           <div class="recipe-meta-value">${recipe.category}</div>
         </div>
       </div>
+      
+      ${recipe.sourceUrl ? `
+        <div class="mb-6">
+          <div class="recipe-meta-label">Source</div>
+          <a href="${recipe.sourceUrl}" target="_blank" rel="noopener noreferrer" class="source-link">
+            ${recipe.sourceUrl}
+          </a>
+        </div>
+      ` : ''}
       
       ${recipe.tags && recipe.tags.length > 0 ? `
         <div class="recipe-card-tags mb-6">
@@ -308,6 +327,9 @@ function showAddRecipeForm() {
   addIngredientField();
   addInstructionField();
 
+  // Clear image preview
+  removeImage();
+
   document.getElementById('formTitle').textContent = 'Add New Recipe';
   recipeFormModal.classList.remove('hidden');
   document.body.style.overflow = 'hidden';
@@ -335,7 +357,27 @@ window.showEditRecipeForm = async function (recipeId) {
     document.getElementById('recipeTags').value = recipe.tags ? recipe.tags.join(', ') : '';
     document.getElementById('recipePrepTime').value = recipe.prepTime || '';
     document.getElementById('recipeCookTime').value = recipe.cookTime || '';
+    document.getElementById('recipeAdditionalTime').value = recipe.additionalTime || '';
     document.getElementById('recipeServings').value = recipe.servings || '';
+    document.getElementById('recipeSourceUrl').value = recipe.sourceUrl || '';
+
+    // Handle existing image
+    const existingImageUrl = document.getElementById('existingImageUrl');
+    const preview = document.getElementById('imagePreview');
+    const previewContainer = document.getElementById('imagePreviewContainer');
+    const fileInput = document.getElementById('recipeImage');
+
+    fileInput.value = ''; // Clear file input
+
+    if (recipe.imageUrl) {
+      existingImageUrl.value = recipe.imageUrl;
+      preview.src = recipe.imageUrl;
+      previewContainer.classList.remove('hidden');
+    } else {
+      existingImageUrl.value = '';
+      preview.src = '';
+      previewContainer.classList.add('hidden');
+    }
 
     // Clear and populate ingredients
     const ingredientsList = document.getElementById('ingredientsList');
@@ -364,6 +406,11 @@ window.showEditRecipeForm = async function (recipeId) {
  * Add ingredient field
  */
 function addIngredientField(ingredient = null) {
+  // Handle case where this is called from a button click (receives event object)
+  if (ingredient && ingredient instanceof Event) {
+    ingredient = null;
+  }
+
   const ingredientsList = document.getElementById('ingredientsList');
   const div = document.createElement('div');
   div.className = 'ingredient-row';
@@ -373,7 +420,7 @@ function addIngredientField(ingredient = null) {
         type="text" 
         class="form-input ingredient-quantity" 
         placeholder="Qty"
-        value="${ingredient ? ingredient.quantity : ''}"
+        value="${ingredient ? ingredient.quantity || '' : ''}"
       >
     </div>
     <div class="form-group">
@@ -381,7 +428,7 @@ function addIngredientField(ingredient = null) {
         type="text" 
         class="form-input ingredient-unit" 
         placeholder="Unit"
-        value="${ingredient ? ingredient.unit : ''}"
+        value="${ingredient ? ingredient.unit || '' : ''}"
       >
     </div>
     <div class="form-group">
@@ -389,7 +436,7 @@ function addIngredientField(ingredient = null) {
         type="text" 
         class="form-input ingredient-name" 
         placeholder="Ingredient name"
-        value="${ingredient ? ingredient.name : ''}"
+        value="${ingredient ? ingredient.name || '' : ''}"
         required
       >
     </div>
@@ -404,6 +451,11 @@ function addIngredientField(ingredient = null) {
  * Add instruction field
  */
 function addInstructionField(instruction = null) {
+  // Handle case where this is called from a button click (receives event object)
+  if (instruction && instruction instanceof Event) {
+    instruction = null;
+  }
+
   const instructionsList = document.getElementById('instructionsList');
   const div = document.createElement('div');
   div.className = 'instruction-row';
@@ -424,6 +476,102 @@ function addInstructionField(instruction = null) {
 }
 
 /**
+ * Handle image file selection
+ */
+function handleImageSelection(e) {
+  const file = e.target.files[0];
+
+  if (!file) {
+    return;
+  }
+
+  // Validate file type
+  const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+  if (!validTypes.includes(file.type)) {
+    alert('Invalid file type. Please select a JPEG, PNG, GIF, or WebP image.');
+    e.target.value = '';
+    return;
+  }
+
+  // Validate file size (5MB max)
+  const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+  if (file.size > maxSize) {
+    alert('File is too large. Maximum file size is 5MB.');
+    e.target.value = '';
+    return;
+  }
+
+  // Show preview using FileReader API
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    const preview = document.getElementById('imagePreview');
+    const previewContainer = document.getElementById('imagePreviewContainer');
+
+    preview.src = event.target.result;
+    previewContainer.classList.remove('hidden');
+  };
+  reader.readAsDataURL(file);
+}
+
+/**
+ * Remove selected image
+ */
+function removeImage() {
+  const fileInput = document.getElementById('recipeImage');
+  const preview = document.getElementById('imagePreview');
+  const previewContainer = document.getElementById('imagePreviewContainer');
+  const existingImageUrl = document.getElementById('existingImageUrl');
+
+  // Clear file input
+  fileInput.value = '';
+
+  // Clear preview
+  preview.src = '';
+  previewContainer.classList.add('hidden');
+
+  // Clear existing image URL (for edit mode)
+  existingImageUrl.value = '';
+}
+
+/**
+ * Upload image to server
+ * Returns the image URL or empty string if no image
+ */
+async function uploadImage() {
+  const fileInput = document.getElementById('recipeImage');
+  const file = fileInput.files[0];
+
+  // If no new file selected, return existing image URL (for edit mode)
+  if (!file) {
+    const existingImageUrl = document.getElementById('existingImageUrl').value;
+    return existingImageUrl || '';
+  }
+
+  // Upload new image
+  const formData = new FormData();
+  formData.append('image', file);
+
+  try {
+    const response = await fetch('http://localhost:3000/api/upload/image', {
+      method: 'POST',
+      body: formData
+    });
+
+    const result = await response.json();
+
+    if (!result.success) {
+      throw new Error(result.error || 'Upload failed');
+    }
+
+    return result.data.imageUrl;
+  } catch (error) {
+    console.error('Image upload failed:', error);
+    throw new Error('Failed to upload image: ' + error.message);
+  }
+}
+
+
+/**
  * Handle recipe form submission
  */
 async function handleRecipeSubmit(e) {
@@ -440,10 +588,12 @@ async function handleRecipeSubmit(e) {
       .filter(tag => tag !== ''),
     prepTime: parseInt(document.getElementById('recipePrepTime').value) || 0,
     cookTime: parseInt(document.getElementById('recipeCookTime').value) || 0,
+    additionalTime: parseInt(document.getElementById('recipeAdditionalTime').value) || 0,
     servings: parseInt(document.getElementById('recipeServings').value) || 0,
     ingredients: [],
     instructions: [],
     imageUrl: '',
+    sourceUrl: document.getElementById('recipeSourceUrl').value.trim(),
     notes: ''
   };
 
@@ -470,6 +620,14 @@ async function handleRecipeSubmit(e) {
   const validation = validateRecipe(formData);
   if (!validation.valid) {
     alert('Please fix the following errors:\n\n' + validation.errors.join('\n'));
+    return;
+  }
+
+  // Upload image if selected (or get existing image URL)
+  try {
+    formData.imageUrl = await uploadImage();
+  } catch (error) {
+    alert('Error uploading image: ' + error.message);
     return;
   }
 

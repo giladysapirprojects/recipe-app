@@ -62,6 +62,7 @@ async function seedSampleData() {
             tags: ['vegetarian', 'baking', 'sweet'],
             prepTime: 15,
             cookTime: 12,
+            additionalTime: 0,
             servings: 24,
             ingredients: [
                 { quantity: '2.25', unit: 'cups', name: 'all-purpose flour' },
@@ -94,6 +95,7 @@ async function seedSampleData() {
             tags: ['vegetarian', 'healthy', 'quick'],
             prepTime: 10,
             cookTime: 0,
+            additionalTime: 0,
             servings: 4,
             ingredients: [
                 { quantity: '6', unit: 'cups', name: 'mixed salad greens' },
@@ -121,6 +123,7 @@ async function seedSampleData() {
             tags: ['italian', 'pasta', 'quick'],
             prepTime: 10,
             cookTime: 15,
+            additionalTime: 0,
             servings: 4,
             ingredients: [
                 { quantity: '1', unit: 'lb', name: 'spaghetti' },
@@ -150,9 +153,9 @@ async function seedSampleData() {
 
         // Insert recipe
         await db.runAsync(`
-      INSERT INTO recipes (id, title, description, category, prep_time, cook_time, servings, image_url, notes, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, '', '', ?, ?)
-    `, [recipe.id, recipe.title, recipe.description, recipe.category, recipe.prepTime, recipe.cookTime, recipe.servings, now, now]);
+      INSERT INTO recipes (id, title, description, category, prep_time, cook_time, additional_time, servings, image_url, source_url, notes, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, '', '', '', ?, ?)
+    `, [recipe.id, recipe.title, recipe.description, recipe.category, recipe.prepTime, recipe.cookTime, recipe.additionalTime, recipe.servings, now, now]);
 
         // Insert ingredients
         for (let i = 0; i < recipe.ingredients.length; i++) {

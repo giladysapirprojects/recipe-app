@@ -120,12 +120,42 @@ router.put('/:id', async (req, res) => {
  */
 router.delete('/:id', async (req, res) => {
     try {
+        // Get recipe first to check for image
+        const recipe = await Recipe.findById(req.params.id);
+
+        if (!recipe) {
+            return res.status(404).json({
+                success: false,
+                error: 'Recipe not found'
+            });
+        }
+
+        // Delete the recipe from database
         const deleted = await Recipe.delete(req.params.id);
 
         if (!deleted) {
             return res.status(404).json({
                 success: false,
                 error: 'Recipe not found'
+            });
+        }
+
+        // CLEANUP: Delete local image file if it exists
+        // NOTE: For cloud storage migration, replace fs.unlink with cloud delete API
+        if (recipe.imageUrl && recipe.imageUrl.startsWith('/assets/images/')) {
+            const fs = require('fs');
+            const path = require('path');
+
+            // Extract filename from URL path
+            const filename = path.basename(recipe.imageUrl);
+            const filePath = path.join(__dirname, '../../frontend/assets/images/recipes', filename);
+
+            // Delete file (async, don't block response)
+            fs.unlink(filePath, (err) => {
+                if (err) {
+                    console.error('Failed to delete image file:', err);
+                    // Don't fail the request if image deletion fails
+                }
             });
         }
 

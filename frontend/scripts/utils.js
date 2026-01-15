@@ -17,10 +17,10 @@ export function generateId() {
  */
 export function formatTime(minutes) {
   if (!minutes || minutes === 0) return '-';
-  
+
   const hours = Math.floor(minutes / 60);
   const mins = minutes % 60;
-  
+
   if (hours === 0) {
     return `${mins} min`;
   } else if (mins === 0) {
@@ -40,34 +40,34 @@ export function searchRecipes(recipes, query) {
   if (!query || query.trim() === '') {
     return recipes;
   }
-  
+
   const searchTerm = query.toLowerCase().trim();
-  
+
   return recipes.filter(recipe => {
     // Search in title
     if (recipe.title.toLowerCase().includes(searchTerm)) {
       return true;
     }
-    
+
     // Search in description
     if (recipe.description && recipe.description.toLowerCase().includes(searchTerm)) {
       return true;
     }
-    
+
     // Search in ingredients
-    if (recipe.ingredients && recipe.ingredients.some(ing => 
+    if (recipe.ingredients && recipe.ingredients.some(ing =>
       ing.name.toLowerCase().includes(searchTerm)
     )) {
       return true;
     }
-    
+
     // Search in tags
-    if (recipe.tags && recipe.tags.some(tag => 
+    if (recipe.tags && recipe.tags.some(tag =>
       tag.toLowerCase().includes(searchTerm)
     )) {
       return true;
     }
-    
+
     return false;
   });
 }
@@ -82,7 +82,7 @@ export function filterByCategory(recipes, category) {
   if (!category || category === 'All') {
     return recipes;
   }
-  
+
   return recipes.filter(recipe => recipe.category === category);
 }
 
@@ -94,23 +94,23 @@ export function filterByCategory(recipes, category) {
  */
 export function sortRecipes(recipes, sortBy) {
   const sorted = [...recipes];
-  
+
   switch (sortBy) {
     case 'title':
       return sorted.sort((a, b) => a.title.localeCompare(b.title));
-    
+
     case 'date':
-      return sorted.sort((a, b) => 
+      return sorted.sort((a, b) =>
         new Date(b.createdAt) - new Date(a.createdAt)
       );
-    
+
     case 'time':
       return sorted.sort((a, b) => {
-        const timeA = (a.prepTime || 0) + (a.cookTime || 0);
-        const timeB = (b.prepTime || 0) + (b.cookTime || 0);
+        const timeA = (a.prepTime || 0) + (a.cookTime || 0) + (a.additionalTime || 0);
+        const timeB = (b.prepTime || 0) + (b.cookTime || 0) + (b.additionalTime || 0);
         return timeA - timeB;
       });
-    
+
     default:
       return sorted;
   }
@@ -137,7 +137,7 @@ export function truncateText(text, maxLength = 100) {
   if (!text || text.length <= maxLength) {
     return text;
   }
-  
+
   return text.substring(0, maxLength).trim() + '...';
 }
 
@@ -148,23 +148,23 @@ export function truncateText(text, maxLength = 100) {
  */
 export function validateRecipe(recipe) {
   const errors = [];
-  
+
   if (!recipe.title || recipe.title.trim() === '') {
     errors.push('Recipe title is required');
   }
-  
+
   if (!recipe.category) {
     errors.push('Category is required');
   }
-  
+
   if (!recipe.ingredients || recipe.ingredients.length === 0) {
     errors.push('At least one ingredient is required');
   }
-  
+
   if (!recipe.instructions || recipe.instructions.length === 0) {
     errors.push('At least one instruction is required');
   }
-  
+
   // Validate ingredients
   if (recipe.ingredients) {
     recipe.ingredients.forEach((ing, index) => {
@@ -173,7 +173,7 @@ export function validateRecipe(recipe) {
       }
     });
   }
-  
+
   // Validate instructions
   if (recipe.instructions) {
     recipe.instructions.forEach((inst, index) => {
@@ -182,7 +182,7 @@ export function validateRecipe(recipe) {
       }
     });
   }
-  
+
   return {
     valid: errors.length === 0,
     errors
@@ -197,13 +197,13 @@ export function validateRecipe(recipe) {
  */
 export function debounce(func, wait = 300) {
   let timeout;
-  
+
   return function executedFunction(...args) {
     const later = () => {
       clearTimeout(timeout);
       func(...args);
     };
-    
+
     clearTimeout(timeout);
     timeout = setTimeout(later, wait);
   };
@@ -216,13 +216,13 @@ export function debounce(func, wait = 300) {
  */
 export function getCategories(recipes) {
   const categories = new Set(['All']);
-  
+
   recipes.forEach(recipe => {
     if (recipe.category) {
       categories.add(recipe.category);
     }
   });
-  
+
   return Array.from(categories);
 }
 
@@ -233,12 +233,12 @@ export function getCategories(recipes) {
  */
 export function getTags(recipes) {
   const tags = new Set();
-  
+
   recipes.forEach(recipe => {
     if (recipe.tags && Array.isArray(recipe.tags)) {
       recipe.tags.forEach(tag => tags.add(tag));
     }
   });
-  
+
   return Array.from(tags);
 }

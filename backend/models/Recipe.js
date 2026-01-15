@@ -73,10 +73,12 @@ class Recipe {
             tags = [],
             prepTime = 0,
             cookTime = 0,
+            additionalTime = 0,
             servings = 0,
             ingredients = [],
             instructions = [],
             imageUrl = '',
+            sourceUrl = '',
             notes = ''
         } = recipeData;
 
@@ -84,9 +86,9 @@ class Recipe {
 
         // Insert recipe
         await db.runAsync(`
-      INSERT INTO recipes (id, title, description, category, prep_time, cook_time, servings, image_url, notes, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `, [id, title, description, category, prepTime, cookTime, servings, imageUrl, notes, now, now]);
+      INSERT INTO recipes (id, title, description, category, prep_time, cook_time, additional_time, servings, image_url, source_url, notes, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `, [id, title, description, category, prepTime, cookTime, additionalTime, servings, imageUrl, sourceUrl, notes, now, now]);
 
         // Insert ingredients
         for (let i = 0; i < ingredients.length; i++) {
@@ -137,10 +139,12 @@ class Recipe {
             tags = [],
             prepTime = 0,
             cookTime = 0,
+            additionalTime = 0,
             servings = 0,
             ingredients = [],
             instructions = [],
             imageUrl = '',
+            sourceUrl = '',
             notes = ''
         } = recipeData;
 
@@ -149,10 +153,10 @@ class Recipe {
         // Update recipe
         await db.runAsync(`
       UPDATE recipes 
-      SET title = ?, description = ?, category = ?, prep_time = ?, cook_time = ?, 
-          servings = ?, image_url = ?, notes = ?, updated_at = ?
+      SET title = ?, description = ?, category = ?, prep_time = ?, cook_time = ?, additional_time = ?,
+          servings = ?, image_url = ?, source_url = ?, notes = ?, updated_at = ?
       WHERE id = ?
-    `, [title, description, category, prepTime, cookTime, servings, imageUrl, notes, now, id]);
+    `, [title, description, category, prepTime, cookTime, additionalTime, servings, imageUrl, sourceUrl, notes, now, id]);
 
         // Delete old ingredients, instructions, and tags
         await db.runAsync('DELETE FROM ingredients WHERE recipe_id = ?', [id]);
@@ -234,8 +238,10 @@ class Recipe {
             category: recipe.category,
             prepTime: recipe.prep_time,
             cookTime: recipe.cook_time,
+            additionalTime: recipe.additional_time,
             servings: recipe.servings,
             imageUrl: recipe.image_url,
+            sourceUrl: recipe.source_url,
             notes: recipe.notes,
             ingredients: ingredients,
             instructions: instructions.map(i => i.instruction),

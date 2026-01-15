@@ -1,0 +1,26 @@
+{
+  "name": "recipe-app-tests",
+  "version": "1.0.0",
+  "description": "Selenium automated tests for Recipe Storage App",
+  "main": "index.js",
+  "scripts": {
+    "test": "node run-tests.js",
+    "test:visible": "HEADLESS=false node run-tests.js",
+    "test:crud": "node recipe-crud.test.js",
+    "test:search": "node search-filter.test.js",
+    "test:validation": "node form-validation.test.js",
+    "test:images": "node image-upload.test.js"
+  },
+  "keywords": [
+    "selenium",
+    "testing",
+    "automation",
+    "recipe-app"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "chromedriver": "^143.0.4",
+    "selenium-webdriver": "^4.16.0"
+  }
+}
