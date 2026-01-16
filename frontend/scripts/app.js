@@ -308,7 +308,7 @@ window.showRecipeDetail = async function (recipeId) {
         <button class="btn btn-primary" onclick="showEditRecipeForm('${recipe.id}')">
           ✏️ Edit Recipe
         </button>
-        <button class="btn btn-danger" onclick="handleDeleteRecipe('${recipe.id}')">
+        <button class="btn btn-danger" onclick="handleDeleteRecipe('${recipe.id}', event)">
           🗑️ Delete Recipe
         </button>
       </div>
@@ -424,6 +424,10 @@ function addIngredientField(ingredient = null) {
   const ingredientsList = document.getElementById('ingredientsList');
   const div = document.createElement('div');
   div.className = 'ingredient-row';
+
+  // Determine which unit should be selected
+  const selectedUnit = ingredient?.unit || 'unit';
+
   div.innerHTML = `
     <div class="form-group">
       <input 
@@ -434,12 +438,26 @@ function addIngredientField(ingredient = null) {
       >
     </div>
     <div class="form-group">
-      <input 
-        type="text" 
-        class="form-input ingredient-unit" 
-        placeholder="Unit"
-        value="${ingredient ? ingredient.unit || '' : ''}"
-      >
+      <select class="form-select ingredient-unit" required>
+        <optgroup label="Volume/Liquid">
+          <option value="cups" ${selectedUnit === 'cups' ? 'selected' : ''}>cups</option>
+          <option value="tbsp" ${selectedUnit === 'tbsp' ? 'selected' : ''}>tbsp</option>
+          <option value="tsp" ${selectedUnit === 'tsp' ? 'selected' : ''}>tsp</option>
+          <option value="fl oz" ${selectedUnit === 'fl oz' ? 'selected' : ''}>fl oz</option>
+          <option value="ml" ${selectedUnit === 'ml' ? 'selected' : ''}>ml</option>
+        </optgroup>
+        <optgroup label="Weight - Metric">
+          <option value="g" ${selectedUnit === 'g' ? 'selected' : ''}>g</option>
+          <option value="kg" ${selectedUnit === 'kg' ? 'selected' : ''}>kg</option>
+        </optgroup>
+        <optgroup label="Weight - Imperial">
+          <option value="oz" ${selectedUnit === 'oz' ? 'selected' : ''}>oz</option>
+          <option value="lbs" ${selectedUnit === 'lbs' ? 'selected' : ''}>lbs</option>
+        </optgroup>
+        <optgroup label="Count">
+          <option value="unit" ${selectedUnit === 'unit' ? 'selected' : ''}>unit</option>
+        </optgroup>
+      </select>
     </div>
     <div class="form-group">
       <input 
@@ -663,7 +681,12 @@ async function handleRecipeSubmit(e) {
 /**
  * Handle delete recipe
  */
-window.handleDeleteRecipe = async function (recipeId) {
+window.handleDeleteRecipe = async function (recipeId, event) {
+  // Prevent event from bubbling to modal overlay
+  if (event) {
+    event.stopPropagation();
+  }
+
   try {
     const recipe = await getRecipeById(recipeId);
 

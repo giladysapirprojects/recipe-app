@@ -109,19 +109,19 @@ These features are planned for the next major release:
 
 ---
 
-### Image Upload
+### Image Upload (done ✅)
 **Description:** Add photos to recipes
 
-**Features:**
-- File input in recipe form
-- Image preview before saving
-- Cloud storage (Cloudinary/S3)
-- Display images in recipe cards and detail view
+~~**Features:**~~
+~~- File input in recipe form~~
+~~- Image preview before saving~~
+~~- Cloud storage (Cloudinary/S3)~~
+~~- Display images in recipe cards and detail view~~
 
-**Implementation:**
-- Add file input to form
-- Use FileReader API for preview
-- Store in cloud with URL in `imageUrl` field
+~~**Implementation:**~~
+~~- Add file input to form~~
+~~- Use FileReader API for preview~~
+~~- Store in cloud with URL in `imageUrl` field~~
 
 ---
 
