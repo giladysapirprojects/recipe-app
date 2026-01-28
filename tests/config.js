@@ -35,6 +35,16 @@ module.exports = {
         ]
     },
 
+    // Import Test URLs
+    IMPORT_TEST_URLS: {
+        // Reliable URL with JSON-LD structured data
+        validJsonLd: 'https://altonbrown.com/recipes/best-burger-ever/',
+        // Invalid format (no protocol)
+        invalidFormat: 'not-a-valid-url-format',
+        // Unreachable domain
+        unreachable: 'https://this-domain-definitely-does-not-exist-12345.com/recipe'
+    },
+
     // Screenshot settings
     SCREENSHOT_DIR: './screenshots',
     SAVE_SCREENSHOTS_ON_FAILURE: true,

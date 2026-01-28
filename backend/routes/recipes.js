@@ -6,6 +6,41 @@
 const express = require('express');
 const router = express.Router();
 const Recipe = require('../models/Recipe');
+const { parseRecipeFromUrl } = require('../services/parser');
+
+/**
+ * POST /api/recipes/import
+ * Import recipe data from URL (does not save - returns data for user review)
+ * Request body: { url: string }
+ */
+router.post('/import', async (req, res) => {
+    try {
+        const { url } = req.body;
+
+        if (!url) {
+            return res.status(400).json({
+                success: false,
+                error: 'URL is required'
+            });
+        }
+
+        // Parse recipe from URL
+        const recipeData = await parseRecipeFromUrl(url);
+
+        res.json({
+            success: true,
+            data: recipeData,
+            message: 'Recipe imported successfully'
+        });
+    } catch (error) {
+        console.error('Error importing recipe:', error);
+        res.status(400).json({
+            success: false,
+            error: 'Failed to import recipe',
+            message: error.message
+        });
+    }
+});
 
 /**
  * GET /api/recipes

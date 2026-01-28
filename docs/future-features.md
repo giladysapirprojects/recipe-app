@@ -2,36 +2,32 @@
 
 This document tracks planned features and improvements for the Recipe App.
 
-## Planned Features
+## Completed Features
 
-### 1. Unit Conversion System
-**Priority:** High  
-**Description:** Add ability to convert between different measurement units
+### ✅ Unit Conversion System (COMPLETED - January 2026)
+**Status:** Implemented and deployed  
+**Description:** Convert between metric and imperial measurement units when viewing recipes
 
-**Features:**
-- **Weight Conversions:**
-  - Pounds (lb) ↔ Grams (g)
-  - Pounds (lb) ↔ Kilograms (kg)
-  - Ounces (oz) ↔ Grams (g)
-  
-- **Volume Conversions:**
-  - Cups ↔ Milliliters (ml)
-  - Tablespoons (tbsp) ↔ Milliliters (ml)
-  - Teaspoons (tsp) ↔ Milliliters (ml)
-  - Fluid ounces (fl oz) ↔ Milliliters (ml)
+**Implemented Features:**
+- ✅ **Weight Conversions:** oz ↔ g, lbs ↔ kg
+- ✅ **Volume Conversions:** cups ↔ ml, tbsp ↔ ml, tsp ↔ ml, fl oz ↔ ml
+- ✅ **North American measurements:** 250ml cup, 15ml tbsp, 5ml tsp
+- ✅ **Toggle button:** Segmented control in recipe detail modal
+- ✅ **localStorage persistence:** User preference remembered
+- ✅ **Smart handling:** Unconvertible units (e.g., "whole", "to taste") left as-is
+- ✅ **Fractional support:** Parses quantities like "1/2", "1 1/4"
 
-**Implementation Ideas:**
-- Add conversion utility functions in `utils.js`
-- Add a dropdown or toggle button on ingredient display to switch units
-- Store original unit in database, calculate conversions on the fly
-- Consider user preference for default unit system (Metric/Imperial)
+**Implementation:**
+- Conversion utilities in `utils.js` (~290 lines)
+- Segmented control toggle in recipe detail modal
+- Real-time conversion when viewing recipes
+- Original units preserved in database
 
-**Technical Considerations:**
-- Need conversion tables/formulas
-- Handle edge cases (different cup sizes by country)
-- Consider precision/rounding for display
+**Documentation:** See [walkthrough](file:///../.gemini/antigravity/brain/b84c3aef-efda-4174-b340-bc56b0a250af/walkthrough.md)
 
 ---
+
+## Planned Features
 
 ### 2. Import Recipe from URL
 **Priority:** Medium  

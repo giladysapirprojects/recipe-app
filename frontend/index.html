@@ -32,6 +32,9 @@
         </div>
 
         <div class="header-actions">
+          <button id="importRecipeBtn" class="btn btn-secondary" aria-label="Import recipe from URL">
+            🔗 Import from URL
+          </button>
           <button id="addRecipeBtn" class="btn btn-primary" aria-label="Add new recipe">
             ➕ Add Recipe
           </button>
@@ -103,16 +106,17 @@
           <div class="form-row">
             <div class="form-group">
               <label for="recipeCategory" class="form-label form-label-required">Category</label>
-              <select id="recipeCategory" class="form-select" required>
-                <option value="">Select category...</option>
-                <option value="Breakfast">Breakfast</option>
-                <option value="Lunch">Lunch</option>
-                <option value="Dinner">Dinner</option>
-                <option value="Dessert">Dessert</option>
-                <option value="Snack">Snack</option>
-                <option value="Appetizer">Appetizer</option>
-                <option value="Beverage">Beverage</option>
-              </select>
+              <input type="text" id="recipeCategory" class="form-input" list="categoryOptions"
+                placeholder="Select or type category..." required autocomplete="off">
+              <datalist id="categoryOptions">
+                <option value="Breakfast">
+                <option value="Lunch">
+                <option value="Dinner">
+                <option value="Dessert">
+                <option value="Snack">
+                <option value="Appetizer">
+                <option value="Beverage">
+              </datalist>
             </div>
 
             <div class="form-group">
@@ -201,6 +205,36 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-close-modal>Cancel</button>
         <button type="submit" form="recipeForm" class="btn btn-primary">💾 Save Recipe</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Import URL Modal -->
+  <div id="importUrlModal" class="modal-overlay hidden" role="dialog" aria-labelledby="importUrlTitle"
+    aria-modal="true">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="importUrlTitle" class="modal-title">Import Recipe from URL</h2>
+        <button class="modal-close" data-close-modal aria-label="Close modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="recipeUrl" class="form-label">Recipe URL</label>
+          <input type="url" id="recipeUrl" class="form-input" placeholder="https://example.com/recipe"
+            aria-describedby="urlHelp">
+          <small id="urlHelp" style="color: var(--gray); font-size: var(--font-size-xs);">
+            Paste a link to a recipe from any website (works best with popular recipe sites)
+          </small>
+        </div>
+
+        <!-- Import status messages -->
+        <div id="importStatus" class="import-status hidden">
+          <div class="status-content"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-close-modal>Cancel</button>
+        <button type="button" id="importUrlBtn" class="btn btn-primary">🔍 Import Recipe</button>
       </div>
     </div>
   </div>

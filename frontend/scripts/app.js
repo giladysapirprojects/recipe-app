@@ -8,7 +8,9 @@ import {
   formatTime,
   getCategories,
   validateRecipe,
-  debounce
+  debounce,
+  convertIngredient,
+  getUnitSystem
 } from './utils.js';
 
 // Application State
@@ -16,6 +18,7 @@ let recipes = [];
 let filteredRecipes = [];
 let currentCategory = 'All';
 let currentRecipeId = null; // For edit mode
+let currentUnitSystem = localStorage.getItem('preferredUnitSystem') || 'metric';
 
 // DOM Elements
 const recipeGrid = document.getElementById('recipeGrid');
@@ -27,6 +30,7 @@ const addRecipeBtn = document.getElementById('addRecipeBtn');
 // Modal elements
 const recipeDetailModal = document.getElementById('recipeDetailModal');
 const recipeFormModal = document.getElementById('recipeFormModal');
+const importUrlModal = document.getElementById('importUrlModal');
 const recipeForm = document.getElementById('recipeForm');
 
 // Initialize Application
@@ -51,6 +55,7 @@ async function initializeApp() {
     recipes = await loadRecipes();
     filteredRecipes = recipes;
     renderCategoryFilters();
+    updateCategoryDatalist(); // Populate category suggestions with custom categories
     renderRecipeList();
   } catch (error) {
     console.error('Failed to initialize app:', error);
@@ -69,6 +74,15 @@ function setupEventListeners() {
 
   // Add recipe button
   addRecipeBtn.addEventListener('click', showAddRecipeForm);
+
+  // Import recipe button and modal handlers
+  document.getElementById('importRecipeBtn').addEventListener('click', showImportUrlModal);
+  document.getElementById('importUrlBtn').addEventListener('click', handleImportUrl);
+  document.getElementById('recipeUrl').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      handleImportUrl();
+    }
+  });
 
   // Recipe form submission
   recipeForm.addEventListener('submit', handleRecipeSubmit);
@@ -111,6 +125,34 @@ function renderCategoryFilters() {
       ${category}
     </button>
   `).join('');
+}
+
+/**
+ * Update category datalist with unique categories from recipes
+ * Combines predefined categories with custom categories from existing recipes
+ */
+function updateCategoryDatalist() {
+  const datalist = document.getElementById('categoryOptions');
+  if (!datalist) return;
+
+  const existingCategories = new Set();
+
+  // Add predefined categories
+  const predefined = ['Breakfast', 'Lunch', 'Dinner', 'Dessert', 'Snack', 'Appetizer', 'Beverage'];
+  predefined.forEach(cat => existingCategories.add(cat));
+
+  // Add categories from existing recipes (excluding 'All' and 'Other')
+  recipes.forEach(recipe => {
+    if (recipe.category && recipe.category !== 'All' && recipe.category !== 'Other') {
+      existingCategories.add(recipe.category);
+    }
+  });
+
+  // Update datalist with sorted unique categories
+  datalist.innerHTML = Array.from(existingCategories)
+    .sort()
+    .map(cat => `<option value="${cat}">`)
+    .join('\n');
 }
 
 /**
@@ -288,13 +330,31 @@ window.showRecipeDetail = async function (recipeId) {
         </div>
       ` : ''}
       
-      <h3 class="recipe-section-title">Ingredients</h3>
+      <div class="unit-toggle-container" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4);">
+        <h3 class="recipe-section-title" style="margin-bottom: 0; border-bottom: none; padding-bottom: 0;">Ingredients</h3>
+        <div class="segmented-control" role="group" aria-label="Unit system selector">
+          <button id="metricBtn" class="segment-btn ${currentUnitSystem === 'metric' ? 'active' : ''}" data-unit-system="metric">
+            Metric
+          </button>
+          <button id="imperialBtn" class="segment-btn ${currentUnitSystem === 'imperial' ? 'active' : ''}" data-unit-system="imperial">
+            Imperial
+          </button>
+        </div>
+      </div>
+      
       <ul class="ingredients-list">
-        ${recipe.ingredients.map(ing => `
+        ${recipe.ingredients.map(ing => {
+      // Try to convert ingredient to current unit system
+      const converted = convertIngredient(ing, currentUnitSystem);
+      const quantity = converted ? converted.quantity : ing.quantity;
+      const unit = converted ? converted.unit : ing.unit;
+
+      return `
           <li class="ingredient-item">
-            <span><strong>${ing.quantity}${ing.unit ? ' ' + ing.unit : ''}</strong> ${ing.name}</span>
+            <span><strong>${quantity}${unit ? ' ' + unit : ''}</strong> ${ing.name}</span>
           </li>
-        `).join('')}
+          `;
+    }).join('')}
       </ul>
       
       <h3 class="recipe-section-title">Instructions</h3>
@@ -314,13 +374,180 @@ window.showRecipeDetail = async function (recipeId) {
       </div>
     `;
 
+    // Re-attach event listeners for the toggle buttons in the modal
     recipeDetailModal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
+
+    // Attach click handlers to the newly created buttons
+    const metricBtn = document.getElementById('metricBtn');
+    const imperialBtn = document.getElementById('imperialBtn');
+
+    if (metricBtn) {
+      metricBtn.addEventListener('click', () => handleUnitSystemChange('metric'));
+    }
+    if (imperialBtn) {
+      imperialBtn.addEventListener('click', () => handleUnitSystemChange('imperial'));
+    }
   } catch (error) {
     console.error('Failed to load recipe:', error);
     showError('Failed to load recipe details');
   }
 };
+
+// ============================================
+// Import Recipe from URL
+// ============================================
+
+/**
+ * Show import URL modal
+ */
+function showImportUrlModal() {
+  importUrlModal.classList.remove('hidden');
+
+  // Reset form
+  document.getElementById('recipeUrl').value = '';
+
+  // Hide any previous status messages
+  const importStatus = document.getElementById('importStatus');
+  importStatus.classList.add('hidden');
+
+  // Focus on URL input
+  setTimeout(() => {
+    document.getElementById('recipeUrl').focus();
+  }, 100);
+}
+
+/**
+ * Handle import URL
+ */
+async function handleImportUrl() {
+  const urlInput = document.getElementById('recipeUrl');
+  const url = urlInput.value.trim();
+  const importBtn = document.getElementById('importUrlBtn');
+
+  // Validate URL
+  if (!url) {
+    showImportStatus('error', 'Please enter a recipe URL');
+    return;
+  }
+
+  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    showImportStatus('error', 'Please enter a valid URL starting with http:// or https://');
+    return;
+  }
+
+  // Show loading state
+  showImportStatus('loading', 'Importing recipe... This may take a few seconds.');
+  importBtn.disabled = true;
+  importBtn.textContent = '⏳ Importing...';
+
+  try {
+    // Call backend import endpoint
+    const response = await fetch('http://localhost:3000/api/recipes/import', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ url })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || 'Failed to import recipe');
+    }
+
+    // Success! Close import modal, open form, then populate with data
+    importUrlModal.classList.add('hidden');
+    showAddRecipeForm();
+    populateFormWithImportedData(result.data);
+
+  } catch (error) {
+    console.error('Import error:', error);
+    showImportStatus('error', error.message || 'Failed to import recipe. Please try a different URL.');
+  } finally {
+    // Reset button state
+    importBtn.disabled = false;
+    importBtn.textContent = '🔍 Import Recipe';
+  }
+}
+
+/**
+ * Show import status message
+ */
+function showImportStatus(type, message) {
+  const importStatus = document.getElementById('importStatus');
+  const statusContent = importStatus.querySelector('.status-content');
+
+  importStatus.classList.remove('hidden', 'status-loading', 'status-error', 'status-success');
+  importStatus.classList.add(`status-${type}`);
+
+  if (type === 'loading') {
+    statusContent.innerHTML = `
+      <div class="spinner"></div>
+      <span>${message}</span>
+    `;
+  } else {
+    const icon = type === 'error' ? '⚠️' : '✅';
+    statusContent.innerHTML = `<span>${icon} ${message}</span>`;
+  }
+}
+
+/**
+ * Populate form with imported recipe data
+ */
+function populateFormWithImportedData(data) {
+  // Basic fields
+  document.getElementById('recipeTitle').value = data.title || '';
+  document.getElementById('recipeDescription').value = data.description || '';
+  document.getElementById('recipeCategory').value = data.category || 'Other';
+  document.getElementById('recipePrepTime').value = data.prepTime || '';
+  document.getElementById('recipeCookTime').value = data.cookTime || '';
+  document.getElementById('recipeAdditionalTime').value = data.additionalTime || '';
+  document.getElementById('recipeServings').value = data.servings || '';
+  document.getElementById('recipeSourceUrl').value = data.sourceUrl || '';
+
+  // Tags
+  if (data.tags && data.tags.length > 0) {
+    document.getElementById('recipeTags').value = data.tags.join(', ');
+  }
+
+  // Clear existing ingredients and instructions
+  document.getElementById('ingredientsList').innerHTML = '';
+  document.getElementById('instructionsList').innerHTML = '';
+
+  // Add ingredients
+  if (data.ingredients && data.ingredients.length > 0) {
+    data.ingredients.forEach(ingredient => {
+      addIngredientField(ingredient);
+    });
+  } else {
+    // Add one empty field if no ingredients
+    addIngredientField();
+  }
+
+  // Add instructions
+  if (data.instructions && data.instructions.length > 0) {
+    data.instructions.forEach(instruction => {
+      addInstructionField(instruction);
+    });
+  } else {
+    // Add one empty field if no instructions
+    addInstructionField();
+  }
+
+  // Handle image URL if provided
+  if (data.imageUrl && data.imageUrl.startsWith('http')) {
+    // Store the external image URL in the hidden field
+    document.getElementById('existingImageUrl').value = data.imageUrl;
+
+    // Show preview of the external image
+    const imagePreview = document.getElementById('imagePreview');
+    const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+    imagePreview.src = data.imageUrl;
+    imagePreviewContainer.classList.remove('hidden');
+  }
+}
 
 /**
  * Show add recipe form
@@ -672,6 +899,7 @@ async function handleRecipeSubmit(e) {
     recipes = await loadRecipes();
     await filterRecipes();
     renderCategoryFilters();
+    updateCategoryDatalist(); // Update category suggestions with any new custom categories
   } catch (error) {
     console.error('Error saving recipe:', error);
     showError('Error saving recipe. Please try again.');
@@ -719,6 +947,7 @@ window.handleDeleteRecipe = async function (recipeId, event) {
 function closeAllModals() {
   recipeDetailModal.classList.add('hidden');
   recipeFormModal.classList.add('hidden');
+  importUrlModal.classList.add('hidden');
   document.body.style.overflow = '';
 }
 
@@ -728,4 +957,39 @@ function closeAllModals() {
 function showError(message) {
   alert('Error: ' + message);
   console.error(message);
+}
+
+/**
+ * Handle unit system change
+ */
+function handleUnitSystemChange(system) {
+  currentUnitSystem = system;
+  localStorage.setItem('preferredUnitSystem', system);
+  updateSegmentedControl();
+
+  // Re-render recipe detail if it's currently open
+  const recipeDetailModal = document.getElementById('recipeDetailModal');
+  if (!recipeDetailModal.classList.contains('hidden')) {
+    // Find the current recipe ID from the edit button
+    const editButton = recipeDetailModal.querySelector('button[onclick*="showEditRecipeForm"]');
+    if (editButton) {
+      const onclick = editButton.getAttribute('onclick');
+      const match = onclick.match(/showEditRecipeForm\('([^']+)'\)/);
+      if (match) {
+        const recipeId = match[1];
+        window.showRecipeDetail(recipeId);
+      }
+    }
+  }
+}
+
+/**
+ * Update segmented control button states
+ */
+function updateSegmentedControl() {
+  const metricBtn = document.getElementById('metricBtn');
+  const imperialBtn = document.getElementById('imperialBtn');
+
+  metricBtn.classList.toggle('active', currentUnitSystem === 'metric');
+  imperialBtn.classList.toggle('active', currentUnitSystem === 'imperial');
 }
