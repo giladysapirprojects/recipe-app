@@ -22,7 +22,7 @@ async function parseRecipeFromUrl(url) {
         const html = await fetchUrl(url);
 
         // Try JSON-LD parsing first (most reliable)
-        let recipeData = parseJsonLd(html);
+        let recipeData = parseJsonLd(html, url);
 
         // Fall back to HTML parsing if JSON-LD not found
         if (!recipeData) {
@@ -78,7 +78,7 @@ async function fetchUrl(url) {
 /**
  * Parse JSON-LD structured data
  */
-function parseJsonLd(html) {
+function parseJsonLd(html, sourceUrl) {
     const $ = cheerio.load(html);
     let recipeData = null;
 
@@ -89,7 +89,7 @@ function parseJsonLd(html) {
             const data = JSON.parse(jsonContent);
 
             // Handle both single objects and @graph arrays
-            const recipes = extractRecipeFromJsonLd(data);
+            const recipes = extractRecipeFromJsonLd(data, sourceUrl);
             if (recipes) {
                 recipeData = recipes;
                 return false; // Break the loop
@@ -105,7 +105,7 @@ function parseJsonLd(html) {
 /**
  * Extract recipe from JSON-LD data structure
  */
-function extractRecipeFromJsonLd(data) {
+function extractRecipeFromJsonLd(data, sourceUrl) {
     let recipe = null;
 
     // Handle @graph structure
@@ -133,7 +133,7 @@ function extractRecipeFromJsonLd(data) {
         additionalTime: parseTime(recipe.totalTime) - parseTime(recipe.prepTime) - parseTime(recipe.cookTime),
         servings: parseServings(recipe.recipeYield),
         imageUrl: parseImage(recipe.image),
-        sourceUrl: recipe.url || '',
+        sourceUrl: recipe.url || sourceUrl || '',
         ingredients: parseIngredients(recipe.recipeIngredient),
         instructions: parseInstructions(recipe.recipeInstructions),
         tags: parseTags(recipe.keywords)
