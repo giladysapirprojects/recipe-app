@@ -35,6 +35,9 @@
           <button id="importRecipeBtn" class="btn btn-secondary" aria-label="Import recipe from URL">
             🔗 Import from URL
           </button>
+          <button id="importOcrBtn" class="btn btn-secondary" aria-label="Import recipe from image or PDF">
+            🖼️ Import from Image/PDF
+          </button>
           <button id="addRecipeBtn" class="btn btn-primary" aria-label="Add new recipe">
             ➕ Add Recipe
           </button>
@@ -238,6 +241,66 @@
       </div>
     </div>
   </div>
+
+  <!-- Import OCR Modal -->
+  <div id="importOcrModal" class="modal-overlay hidden" role="dialog" aria-labelledby="importOcrTitle"
+    aria-modal="true">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="importOcrTitle" class="modal-title">Import Recipe from Image/PDF</h2>
+        <button class="modal-close" data-close-modal aria-label="Close modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="ocrFileInput" class="form-label">Select Image or PDF</label>
+
+          <!-- File Upload Drop Zone -->
+          <div id="ocrDropZone" class="ocr-drop-zone">
+            <div class="drop-zone-content">
+              <div class="drop-zone-icon">📄</div>
+              <p class="drop-zone-text">
+                <strong>Drop your file here</strong> or click to browse
+              </p>
+              <p class="drop-zone-subtext">
+                Supports: JPG, PNG, WebP, BMP, PDF (max 10MB)
+              </p>
+            </div>
+            <input type="file" id="ocrFileInput" class="ocr-file-input"
+              accept="image/jpeg,image/jpg,image/png,image/webp,image/bmp,application/pdf"
+              aria-describedby="ocrFileHelp">
+          </div>
+
+          <small id="ocrFileHelp"
+            style="color: var(--gray); font-size: var(--font-size-xs); display: block; margin-top: 0.5rem;">
+            Upload a clear image or PDF of a recipe. OCR processing may take 5-10 seconds.
+          </small>
+
+          <!-- Selected File Display -->
+          <div id="ocrSelectedFile" class="ocr-selected-file hidden">
+            <span class="file-info">
+              <span class="file-icon">📎</span>
+              <span id="ocrFileName" class="file-name"></span>
+            </span>
+            <button type="button" id="ocrRemoveFileBtn" class="btn btn-link btn-sm" aria-label="Remove file">
+              ✕ Remove
+            </button>
+          </div>
+        </div>
+
+        <!-- OCR status messages -->
+        <div id="ocrStatus" class="import-status hidden">
+          <div class="status-content"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-close-modal>Cancel</button>
+        <button type="button" id="processOcrBtn" class="btn btn-primary" disabled>
+          🔍 Process & Import
+        </button>
+      </div>
+    </div>
+  </div>
+
 
   <!-- Scripts -->
   <script type="module" src="scripts/app.js"></script>

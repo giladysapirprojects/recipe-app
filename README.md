@@ -39,9 +39,13 @@ Then visit `http://localhost:8000`
 ## Features
 
 ✅ Create, read, update, delete recipes  
+✅ **Import recipes from URLs** with automatic data extraction  
+✅ **OCR recipe import** from images and PDFs (JPEG, PNG, WebP, BMP, PDF)  
 ✅ Search across titles, ingredients, and tags  
-✅ Filter by category (Breakfast, Lunch, Dinner, etc.)  
+✅ Filter by **flexible categories** (predefined + custom from imports)  
 ✅ Dynamic ingredient and instruction fields  
+✅ **Unit conversion** between metric and imperial systems  
+✅ **Image uploads** with preview and local storage  
 ✅ Persistent storage in SQLite database  
 ✅ Premium modern UI with smooth animations  
 ✅ Responsive design (mobile, tablet, desktop)  
@@ -104,12 +108,18 @@ npm run migrate
 
 ## Future Enhancements
 
-- Image uploads for recipes
-- User authentication
-- Cloud deployment (PostgreSQL)
+See [docs/future-features.md](docs/future-features.md) for complete roadmap.
+
+**Near-term:**
+- User authentication and cloud sync
+- Favorites & ratings system
+- Print-friendly recipe view
+
+**Long-term:**
 - Meal planning calendar
 - Shopping list generation
-- Recipe import from URLs
+- Nutritional information
+- Recipe sharing & export
 
 ## License
 

@@ -84,6 +84,18 @@ function setupEventListeners() {
     }
   });
 
+  // OCR import button and modal handlers
+  document.getElementById('importOcrBtn').addEventListener('click', showOcrImportModal);
+  document.getElementById('processOcrBtn').addEventListener('click', handleProcessOcr);
+  document.getElementById('ocrFileInput').addEventListener('change', handleOcrFileSelect);
+  document.getElementById('ocrRemoveFileBtn').addEventListener('click', handleOcrRemoveFile);
+
+  // OCR drag and drop
+  const ocrDropZone = document.getElementById('ocrDropZone');
+  ocrDropZone.addEventListener('dragover', handleOcrDragOver);
+  ocrDropZone.addEventListener('dragleave', handleOcrDragLeave);
+  ocrDropZone.addEventListener('drop', handleOcrDrop);
+
   // Recipe form submission
   recipeForm.addEventListener('submit', handleRecipeSubmit);
 
@@ -548,6 +560,196 @@ function populateFormWithImportedData(data) {
     imagePreviewContainer.classList.remove('hidden');
   }
 }
+
+// ============================================
+// Import Recipe from Image/PDF (OCR)
+// ============================================
+
+let selectedOcrFile = null;
+
+/**
+ * Show OCR import modal
+ */
+function showOcrImportModal() {
+  const importOcrModal = document.getElementById('importOcrModal');
+  importOcrModal.classList.remove('hidden');
+
+  // Reset file selection
+  selectedOcrFile = null;
+  document.getElementById('ocrFileInput').value = '';
+  document.getElementById('ocrSelectedFile').classList.add('hidden');
+  document.getElementById('processOcrBtn').disabled = true;
+
+  // Hide any previous status messages
+  const ocrStatus = document.getElementById('ocrStatus');
+  ocrStatus.classList.add('hidden');
+}
+
+/**
+ * Handle OCR file selection
+ */
+function handleOcrFileSelect(e) {
+  const file = e.target.files[0];
+  if (file) {
+    setSelectedOcrFile(file);
+  }
+}
+
+/**
+ * Handle OCR drag over
+ */
+function handleOcrDragOver(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  e.currentTarget.classList.add('drag-over');
+}
+
+/**
+ * Handle OCR drag leave
+ */
+function handleOcrDragLeave(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  e.currentTarget.classList.remove('drag-over');
+}
+
+/**
+ * Handle OCR drop
+ */
+function handleOcrDrop(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  e.currentTarget.classList.remove('drag-over');
+
+  const files = e.dataTransfer.files;
+  if (files.length > 0) {
+    setSelectedOcrFile(files[0]);
+  }
+}
+
+/**
+ * Set selected OCR file and update UI
+ */
+function setSelectedOcrFile(file) {
+  // Validate file type
+  const allowedTypes = [
+    'image/jpeg',
+    'image/jpg',
+    'image/png',
+    'image/webp',
+    'image/bmp',
+    'application/pdf'
+  ];
+
+  if (!allowedTypes.includes(file.type)) {
+    showOcrStatus('error', 'Invalid file type. Please select an image (JPG, PNG, WebP, BMP) or PDF file.');
+    return;
+  }
+
+  // Validate file size (10MB max)
+  const maxSize = 10 * 1024 * 1024;
+  if (file.size > maxSize) {
+    showOcrStatus('error', 'File is too large. Maximum file size is 10MB.');
+    return;
+  }
+
+  // Store file and update UI
+  selectedOcrFile = file;
+
+  // Show selected file
+  document.getElementById('ocrFileName').textContent = file.name;
+  document.getElementById('ocrSelectedFile').classList.remove('hidden');
+
+  // Enable process button
+  document.getElementById('processOcrBtn').disabled = false;
+
+  // Hide error messages
+  document.getElementById('ocrStatus').classList.add('hidden');
+}
+
+/**
+ * Handle remove OCR file
+ */
+function handleOcrRemoveFile() {
+  selectedOcrFile = null;
+  document.getElementById('ocrFileInput').value = '';
+  document.getElementById('ocrSelectedFile').classList.add('hidden');
+  document.getElementById('processOcrBtn').disabled = true;
+  document.getElementById('ocrStatus').classList.add('hidden');
+}
+
+/**
+ * Process OCR file
+ */
+async function handleProcessOcr() {
+  if (!selectedOcrFile) {
+    showOcrStatus('error', 'Please select a file first');
+    return;
+  }
+
+  const processBtn = document.getElementById('processOcrBtn');
+
+  // Show loading state
+  showOcrStatus('loading', 'Processing file with OCR... This may take 5-10 seconds.');
+  processBtn.disabled = true;
+  processBtn.textContent = '⏳ Processing...';
+
+  try {
+    // Create FormData for file upload
+    const formData = new FormData();
+    formData.append('file', selectedOcrFile);
+
+    // Call backend OCR endpoint
+    const response = await fetch('http://localhost:3000/api/recipes/import/ocr', {
+      method: 'POST',
+      body: formData
+    });
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || 'Failed to process file');
+    }
+
+    // Success! Close OCR modal, open form, then populate with data
+    document.getElementById('importOcrModal').classList.add('hidden');
+    showAddRecipeForm();
+    populateFormWithImportedData(result.data);
+
+    // Show success message (brief)
+    console.log('Recipe extracted from file:', result.data.title);
+
+  } catch (error) {
+    console.error('OCR processing error:', error);
+    showOcrStatus('error', error.message || 'Failed to process file. Please try a different image.');
+  } finally {
+    // Reset button state
+    processBtn.disabled = false;
+    processBtn.textContent = '🔍 Process & Import';
+  }
+}
+
+/**
+ * Show OCR status message
+ */
+function showOcrStatus(type, message) {
+  const ocrStatus = document.getElementById('ocrStatus');
+  const statusContent = ocrStatus.querySelector('.status-content');
+
+  ocrStatus.classList.remove('hidden', 'status-loading', 'status-error', 'status-success');
+  ocrStatus.classList.add(`status-${type}`);
+
+  if (type === 'loading') {
+    statusContent.innerHTML = `
+      <div class="spinner"></div>
+      <span>${message}</span>
+    `;
+  } else {
+    const icon = type === 'error' ? '⚠️' : '✅';
+    statusContent.innerHTML = `<span>${icon} ${message}</span>`;
+  }
+}
+
 
 /**
  * Show add recipe form

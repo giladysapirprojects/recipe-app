@@ -5,8 +5,36 @@
 
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
 const Recipe = require('../models/Recipe');
 const { parseRecipeFromUrl } = require('../services/parser');
+const OCRService = require('../services/ocr/ocrService');
+const { parseRecipeFromText } = require('../services/recipeTextParser');
+
+// Configure multer for memory storage (OCR needs buffer)
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+        fileSize: 10 * 1024 * 1024 // 10MB limit for OCR files
+    },
+    fileFilter: (req, file, cb) => {
+        const allowedTypes = [
+            'image/jpeg',
+            'image/jpg',
+            'image/png',
+            'image/webp',
+            'image/bmp',
+            'application/pdf'
+        ];
+
+        if (allowedTypes.includes(file.mimetype)) {
+            cb(null, true);
+        } else {
+            cb(new Error('Only images (JPEG, PNG, WebP, BMP) and PDF files are allowed'), false);
+        }
+    }
+});
+
 
 /**
  * POST /api/recipes/import
@@ -41,6 +69,72 @@ router.post('/import', async (req, res) => {
         });
     }
 });
+
+/**
+ * POST /api/recipes/import/ocr
+ * Import recipe data from image or PDF using OCR
+ * Does not save - returns data for user review
+ * Request: multipart/form-data with 'file' field
+ */
+router.post('/import/ocr', upload.single('file'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                error: 'No file uploaded'
+            });
+        }
+
+        console.log(`Processing OCR for file: ${req.file.originalname} (${req.file.mimetype})`);
+
+        // Initialize OCR service (uses Tesseract by default, configurable via env)
+        const ocrProvider = process.env.OCR_PROVIDER || 'tesseract';
+        const ocrService = new OCRService(ocrProvider);
+
+        // Extract text from file
+        const extractedText = await ocrService.extractTextFromFile(
+            req.file.buffer,
+            req.file.mimetype
+        );
+
+        if (!extractedText || extractedText.trim().length === 0) {
+            return res.status(400).json({
+                success: false,
+                error: 'No text could be extracted from the file',
+                message: 'The file may be blank, corrupted, or not contain readable text'
+            });
+        }
+
+        console.log(`Extracted ${extractedText.length} characters from file`);
+
+        // Parse text into recipe structure
+        const recipeData = parseRecipeFromText(extractedText);
+
+        // Validate we got at least a title
+        if (!recipeData.title || recipeData.title === 'Untitled Recipe') {
+            return res.status(400).json({
+                success: false,
+                error: 'Could not extract recipe data from this file',
+                message: 'The file does not appear to contain a valid recipe. Please check the image quality and try again.'
+            });
+        }
+
+        res.json({
+            success: true,
+            data: recipeData,
+            extractedText: extractedText.substring(0, 500), // Return first 500 chars for debugging
+            message: 'Recipe extracted successfully from file'
+        });
+    } catch (error) {
+        console.error('Error processing OCR:', error);
+        res.status(400).json({
+            success: false,
+            error: 'Failed to process file',
+            message: error.message
+        });
+    }
+});
+
 
 /**
  * GET /api/recipes

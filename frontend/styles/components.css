@@ -839,3 +839,117 @@
     color: var(--primary-dark);
     text-decoration: underline;
 }
+
+/* ============================================
+   OCR Import - File Upload Drop Zone
+   ============================================ */
+
+.ocr-drop-zone {
+    position: relative;
+    border: 2px dashed var(--surface-2);
+    border-radius: var(--radius-lg);
+    padding: var(--space-8);
+    text-align: center;
+    background: var(--surface);
+    transition: all var(--transition-base);
+    cursor: pointer;
+}
+
+.ocr-drop-zone:hover {
+    border-color: var(--primary-light);
+    background: var(--white);
+}
+
+.ocr-drop-zone.drag-over {
+    border-color: var(--primary);
+    background: hsla(262, 73%, 60%, 0.05);
+    border-style: solid;
+    box-shadow: 0 0 0 4px hsla(262, 73%, 60%, 0.1);
+}
+
+.drop-zone-content {
+    pointer-events: none;
+}
+
+.drop-zone-icon {
+    font-size: 48px;
+    margin-bottom: var(--space-3);
+    opacity: 0.5;
+}
+
+.drop-zone-text {
+    font-size: var(--font-size-base);
+    color: var(--dark-2);
+    margin-bottom: var(--space-2);
+}
+
+.drop-zone-text strong {
+    color: var(--primary);
+    font-weight: var(--font-weight-semibold);
+}
+
+.drop-zone-subtext {
+    font-size: var(--font-size-sm);
+    color: var(--gray);
+    margin: 0;
+}
+
+.ocr-file-input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* Selected File Display */
+.ocr-selected-file {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-4);
+    background: hsla(262, 73%, 60%, 0.05);
+    border: 1px solid var(--primary-light);
+    border-radius: var(--radius-md);
+    margin-top: var(--space-4);
+}
+
+.ocr-selected-file .file-info {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.ocr-selected-file .file-icon {
+    font-size: var(--font-size-xl);
+}
+
+.ocr-selected-file .file-name {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--dark-2);
+    word-break: break-all;
+}
+
+.btn-link {
+    background: transparent;
+    color: var(--danger);
+    box-shadow: none;
+    padding: var(--space-2) var(--space-3);
+}
+
+.btn-link:hover:not(:disabled) {
+    background: hsla(0, 84%, 60%, 0.1);
+    transform: none;
+}
+
+/* ============================================
+   Utility Classes
+   ============================================ */
+
+.hidden {
+    display: none !important;
+}
+
+.mt-2 {
+    margin-top: var(--space-2);
+}
