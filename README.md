@@ -2,6 +2,9 @@
 
 A modern recipe management app with a beautiful web interface and local SQLite database.
 
+> [!NOTE]
+> Created as an AI development experiment using Claude Sonnet 4.5 and Antigravity IDE.
+
 ## Architecture
 
 - **Frontend**: Vanilla HTML/CSS/JavaScript (ES6 modules)
