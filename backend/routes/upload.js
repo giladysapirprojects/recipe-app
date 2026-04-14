@@ -19,7 +19,7 @@ const fs = require('fs');
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        const uploadDir = path.join(__dirname, '../../frontend/assets/images/recipes');
+        const uploadDir = path.join(__dirname, '../uploads/images/recipes');
 
         // Ensure directory exists
         if (!fs.existsSync(uploadDir)) {

@@ -18,8 +18,8 @@ app.use(express.json()); // Parse JSON request bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 
 // Static file serving for uploaded images
-// Serves /frontend/assets directory at /assets route
-app.use('/assets', express.static(path.join(__dirname, '../frontend/assets')));
+// Serves /backend/uploads directory at /assets route (decoupled from frontend)
+app.use('/assets', express.static(path.join(__dirname, 'uploads')));
 
 // Request logging middleware (development)
 if (process.env.NODE_ENV === 'development') {

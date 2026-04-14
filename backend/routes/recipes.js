@@ -270,7 +270,7 @@ router.delete('/:id', async (req, res) => {
 
             // Extract filename from URL path
             const filename = path.basename(recipe.imageUrl);
-            const filePath = path.join(__dirname, '../../frontend/assets/images/recipes', filename);
+            const filePath = path.join(__dirname, '../uploads/images/recipes', filename);
 
             // Delete file (async, don't block response)
             fs.unlink(filePath, (err) => {
