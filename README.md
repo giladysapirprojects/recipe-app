@@ -20,24 +20,18 @@ A modern recipe management app with a beautiful web interface and local SQLite d
 
 ### Installation
 
-1. **Start the Backend**:
+1. **Install Dependencies**:
 ```bash
-cd backend
-npm install
-npm run migrate -- --seed
-npm start
+# This will install root dependencies, backend dependencies, and frontend dependencies
+npm run install:all
 ```
 
-Backend will run on `http://localhost:3000`
-
-2. **Open the Frontend**:
+2. **Start the Development Servers**:
 ```bash
-cd frontend
-# Open index.html in browser, or use a local server:
-python3 -m http.server 8000
+npm run dev
 ```
 
-Then visit `http://localhost:8000`
+This will concurrently run the backend on `http://localhost:3000` and the frontend React application development server.
 
 ## Features
 
@@ -95,11 +89,8 @@ npm run test:visible
 See the [Testing README](tests/README.md) for detailed instructions.
 
 
-## Development
-
-**Backend** (with auto-reload):
+**Start both Dev Servers**:
 ```bash
-cd backend
 npm run dev
 ```
 
